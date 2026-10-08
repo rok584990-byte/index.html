@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Virtual Lab Gelombang Bunyi — Intensitas & Taraf Intensitas</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033}
+header{background:linear-gradient(135deg,#173b7a,#2563a6);color:white;padding:24px 18px}
+h1,h2,h3{margin-top:0}
+.container{max-width:1100px;margin:auto;padding:18px}
+.card{background:white;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 5px 18px rgba(0,0,0,.08)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.control{padding:15px;background:#f7f9fc;border-radius:12px}
+label{font-weight:700;display:block;margin-bottom:8px}
+input[type=range]{width:100%}
+.value{font-size:1.25rem;font-weight:700}
+button{border:0;border-radius:10px;padding:11px 15px;margin:4px;background:#2563a6;color:white;font-weight:700;cursor:pointer}
+button:hover{filter:brightness(.94)}
+button.secondary{background:#64748b}
+button.danger{background:#b42318}
+button.success{background:#16834b}
+.status{padding:12px;border-radius:10px;background:#eef6ff;margin-top:10px}
+.big{font-size:2rem;font-weight:800}
+.formula{font-family:Georgia,serif;font-size:1.25rem;background:#f1f5f9;padding:12px;border-radius:10px;text-align:center}
+canvas{width:100%;height:280px;border:1px solid #dbe2ea;border-radius:10px;background:white}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px;border:1px solid #d9e0e8;text-align:center}
+th{background:#eef4fb}
+.mission{border-left:5px solid #f59e0b;background:#fff8e8;padding:15px;border-radius:8px}
+.note{font-size:.92rem;color:#526173}
+footer{text-align:center;padding:25px;color:#667085}
+@media(max-width:600px){header{padding:20px 14px}.container{padding:12px}.card{padding:15px}}
+</style>
+</head>
+<body>
+<header>
+<div class="container">
+<h1>🔊 Virtual Lab Gelombang Bunyi</h1>
+<p>Intensitas Bunyi & Taraf Intensitas Bunyi — SMA Kelas XI</p>
+</div>
+</header>
+
+<main class="container">
+<section class="card">
+<h2>🎯 Tujuan Pembelajaran</h2>
+<ul>
+<li>Menyelidiki hubungan daya sumber, jarak, dan intensitas bunyi.</li>
+<li>Menganalisis hukum kuadrat terbalik: I ∝ 1/r².</li>
+<li>Menghitung taraf intensitas bunyi dalam satuan desibel (dB).</li>
+<li>Menghubungkan perubahan parameter simulasi dengan bunyi yang terdengar.</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>🎮 Laboratorium Interaktif</h2>
+<div class="grid">
+<div class="control">
+<label for="power">Daya sumber P (W)</label>
+<input id="power" type="range" min="0.1" max="100" step="0.1" value="10">
+<div class="value"><span id="powerVal">10.0</span> W</div>
+</div>
+<div class="control">
+<label for="distance">Jarak r (m)</label>
+<input id="distance" type="range" min="0.5" max="20" step="0.5" value="2">
+<div class="value"><span id="distanceVal">2.0</span> m</div>
+</div>
+<div class="control">
+<label for="frequency">Frekuensi (Hz)</label>
+<input id="frequency" type="range" min="100" max="2000" step="10" value="440">
+<div class="value"><span id="freqVal">440</span> Hz</div>
+</div>
+</div>
+
+<div class="card" style="background:#f8fbff">
+<h3>🔊 Generator Bunyi Nyata</h3>
+<p>Tekan <b>NYALAKAN BUNYI</b> untuk menghasilkan nada melalui perangkat. Mulai dengan volume perangkat yang rendah.</p>
+<button id="start" class="success">🔊 NYALAKAN BUNYI</button>
+<button id="pause" class="secondary">⏸ PAUSE</button>
+<button id="stop" class="danger">⏹ STOP</button>
+<div id="audioStatus" class="status">Status audio: siap</div>
+</div>
+
+<div class="grid">
+<div class="control">
+<div class="note">Intensitas bunyi</div>
+<div id="intensity" class="big">—</div>
+<div>W/m²</div>
+</div>
+<div class="control">
+<div class="note">Taraf intensitas</div>
+<div id="level" class="big">—</div>
+<div>dB</div>
+</div>
+<div class="control">
+<div class="note">Amplitudo relatif</div>
+<div id="amp" class="big">—</div>
+<div>%</div>
+</div>
+</div>
+</section>
+
+<section class="card">
+<h2>📐 Konsep Fisika</h2>
+<div class="formula">I = P / (4πr²)</div>
+<p>Intensitas bunyi adalah daya bunyi yang melewati setiap satuan luas. Untuk sumber titik ideal, intensitas berkurang menurut kuadrat jarak.</p>
+<div class="formula">β = 10 log₁₀(I / I₀)</div>
+<p>dengan <b>I₀ = 10⁻¹² W/m²</b> sebagai intensitas acuan.</p>
+</section>
+
+<section class="card">
+<h2>🧪 Eksperimen 1 — Pengaruh Jarak</h2>
+<p>Atur jarak dan amati perubahan intensitas. Pertahankan daya sumber.</p>
+<button id="record">➕ Catat Data</button>
+<button id="clear" class="secondary">🗑 Hapus Data</button>
+<table>
+<thead><tr><th>No.</th><th>P (W)</th><th>r (m)</th><th>I (W/m²)</th><th>β (dB)</th></tr></thead>
+<tbody id="dataBody"></tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>📊 Grafik Intensitas terhadap Jarak</h2>
+<canvas id="chart" width="1000" height="300"></canvas>
+</section>
+
+<section class="card mission">
+<h2>🏆 Misi Penyelidikan</h2>
+<ol>
+<li>Pertahankan daya sumber pada 10 W.</li>
+<li>Catat intensitas pada jarak 1 m, 2 m, 4 m, dan 8 m.</li>
+<li>Bandingkan hasil pengukuran dengan prediksi hukum kuadrat terbalik.</li>
+<li>Temukan jarak yang membuat intensitas menjadi sekitar seperempat nilai awal.</li>
+</ol>
+</section>
+
+<section class="card">
+<h2>🧠 Analisis</h2>
+<ol>
+<li>Bagaimana pengaruh jarak terhadap intensitas bunyi?</li>
+<li>Jika jarak diperbesar 2 kali, bagaimana perubahan intensitas secara teori?</li>
+<li>Apa yang terjadi pada taraf intensitas jika intensitas bunyi meningkat?</li>
+<li>Mengapa bunyi terasa lebih lemah ketika kita menjauh dari sumber?</li>
+</ol>
+<textarea id="analysis" rows="6" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px" placeholder="Tuliskan hasil analisis kelompok..."></textarea>
+</section>
+
+<section class="card">
+<h2>✅ Evaluasi Konsep</h2>
+<p><b>Situasi:</b> Sumber bunyi tetap memiliki daya yang sama. Jika jarak pengamat dari sumber berubah dari r menjadi 2r, bagaimana intensitas bunyi?</p>
+<button onclick="showAnswer(1)">I menjadi 1/2 kali</button>
+<button onclick="showAnswer(2)">I menjadi 1/4 kali</button>
+<button onclick="showAnswer(3)">I menjadi 2 kali</button>
+<button onclick="showAnswer(4)">I tetap</button>
+<div id="feedback" class="status" style="display:none"></div>
+</section>
+</main>
+
+<footer>
+Virtual Lab Fisika SMA Kelas XI • Intensitas & Taraf Intensitas Bunyi
+</footer>
+
+<script>
+const I0=1e-12;
+const $=id=>document.getElementById(id);
+let audio={ctx:null,osc:null,gain:null,master:null,playing:false};
+let rows=[];
+
+function calc(){
+ const P=parseFloat($("power").value);
+ const r=parseFloat($("distance").value);
+ const f=parseFloat($("frequency").value);
+ const I=P/(4*Math.PI*r*r);
+ const beta=10*Math.log10(I/I0);
+ const amp=Math.min(100,Math.max(0,100*Math.sqrt(P)/(r*5)));
+ $("powerVal").textContent=P.toFixed(1);
+ $("distanceVal").textContent=r.toFixed(1);
+ $("freqVal").textContent=f.toFixed(0);
+ $("intensity").textContent=I.toExponential(3);
+ $("level").textContent=beta.toFixed(2);
+ $("amp").textContent=amp.toFixed(1);
+ if(audio.osc && audio.playing){
+   audio.osc.frequency.setTargetAtTime(f,audio.ctx.currentTime,.01);
+   audio.gain.gain.setTargetAtTime(Math.min(.18,amp/600),audio.ctx.currentTime,.03);
+ }
+ draw();
+}
+["power","distance","frequency"].forEach(id=>$(id).addEventListener("input",calc));
+
+async function initAudio(){
+ if(!audio.ctx){
+   const C=window.AudioContext||window.webkitAudioContext;
+   if(!C){$("audioStatus").textContent="Browser tidak mendukung Web Audio API.";return false}
+   audio.ctx=new C();
+   audio.master=audio.ctx.createGain();
+   audio.master.gain.value=.35;
+   audio.master.connect(audio.ctx.destination);
+ }
+ if(audio.ctx.state==="suspended") await audio.ctx.resume();
+ return true;
+}
+async function startSound(){
+ if(!(await initAudio())) return;
+ if(audio.osc){try{audio.osc.stop()}catch(e){}}
+ const osc=audio.ctx.createOscillator();
+ const gain=audio.ctx.createGain();
+ osc.type="sine";
+ osc.frequency.value=parseFloat($("frequency").value);
+ gain.gain.value=0;
+ osc.connect(gain); gain.connect(audio.master);
+ osc.start();
+ gain.gain.linearRampToValueAtTime(.08,audio.ctx.currentTime+.08);
+ audio.osc=osc; audio.gain=gain; audio.playing=true;
+ $("audioStatus").textContent="Status audio: 🔊 bunyi aktif";
+ calc();
+}
+async function pauseSound(){
+ if(audio.ctx && audio.playing){
+   await audio.ctx.suspend();
+   audio.playing=false;
+   $("audioStatus").textContent="Status audio: ⏸ dijeda";
+ }
+}
+function stopSound(){
+ if(audio.osc){
+   try{audio.osc.stop()}catch(e){}
+   audio.osc=null; audio.gain=null;
+ }
+ if(audio.ctx) audio.ctx.resume();
+ audio.playing=false;
+ $("audioStatus").textContent="Status audio: ⏹ berhenti";
+}
+$("start").onclick=startSound;
+$("pause").onclick=pauseSound;
+$("stop").onclick=stopSound;
+
+function recordData(){
+ const P=parseFloat($("power").value),r=parseFloat($("distance").value);
+ const I=P/(4*Math.PI*r*r),b=10*Math.log10(I/I0);
+ rows.push({P,r,I,b});
+ renderTable(); draw();
+}
+function renderTable(){
+ $("dataBody").innerHTML=rows.map((x,i)=>`<tr><td>${i+1}</td><td>${x.P.toFixed(1)}</td><td>${x.r.toFixed(1)}</td><td>${x.I.toExponential(3)}</td><td>${x.b.toFixed(2)}</td></tr>`).join("");
+}
+$("record").onclick=recordData;
+$("clear").onclick=()=>{rows=[];renderTable();draw()};
+
+function draw(){
+ const c=$("chart"),ctx=c.getContext("2d");
+ ctx.clearRect(0,0,c.width,c.height);
+ const pad=55,w=c.width-pad*2,h=c.height-pad*2;
+ ctx.strokeStyle="#64748b";ctx.lineWidth=2;
+ ctx.beginPath();ctx.moveTo(pad,pad);ctx.lineTo(pad,pad+h);ctx.lineTo(pad+w,pad+h);ctx.stroke();
+ ctx.fillStyle="#172033";ctx.font="16px Arial";
+ ctx.fillText("Intensitas relatif",pad,25);ctx.fillText("Jarak (m)",c.width-120,c.height-18);
+ if(!rows.length){ctx.fillText("Catat beberapa data untuk menampilkan grafik.",pad+20,pad+h/2);return}
+ const maxR=Math.max(...rows.map(x=>x.r),1),maxI=Math.max(...rows.map(x=>x.I),1);
+ rows.forEach(x=>{
+   const px=pad+(x.r/maxR)*w;
+   const py=pad+h-(x.I/maxI)*h;
+   ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();
+ });
+}
+function showAnswer(n){
+ const f=$("feedback");f.style.display="block";
+ if(n===2){
+   f.textContent="✅ Benar! Karena I ∝ 1/r², jika jarak menjadi 2 kali, intensitas menjadi 1/4 kali.";
+ }else{
+   f.textContent="❌ Belum tepat. Gunakan hubungan I ∝ 1/r² dan coba lagi.";
+ }
+}
+calc();
+</script>
+</body>
+</html>
